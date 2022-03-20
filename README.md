@@ -1,7 +1,13 @@
+
 # derbydump
 
 
 Derby SQL dump. This project will take a Derby database and export the data in it to a file. It is similar, but not feature parity, to the mysqldump executable.
+
+## Fork
+
+- Updated gradle to version 5.0
+- Updated apache derby to 10.14 (still works with java 8)
 
 ## Features
 

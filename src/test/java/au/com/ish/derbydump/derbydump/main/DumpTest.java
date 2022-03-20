@@ -53,13 +53,13 @@ public class DumpTest {
 
 	private Configuration config;
 
-	private String tableName;
-	private String outputTableName;
-	private boolean skipped;
-	private boolean truncate;
-	private String[] columns;
-	private Object[] valuesToInsert;
-	private String[] validOutputs;
+	private final String tableName;
+	private final String outputTableName;
+	private final boolean skipped;
+	private final boolean truncate;
+	private final String[] columns;
+	private final Object[] valuesToInsert;
+	private final String[] validOutputs;
 
 	@Before
 	public void setUp() throws Exception {
@@ -97,21 +97,21 @@ public class DumpTest {
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Collection<Object[]> setupTestMatrix() throws Exception {
-		List<Object[]> result = new ArrayList<Object[]>();
+		List<Object[]> result = new ArrayList<>();
 
 		//testing numbers (BIGINT, DECIMAL, REAL, SMALLINT, INTEGER, DOUBLE)
 		{
 			//standard set of numbers
 			String[] columns = new String[] {"c1 BIGINT", "c2 DECIMAL(10,2)", "c3 REAL", "c4 SMALLINT", "c5 INTEGER", "c6 DOUBLE"};
-			Object[] row1 = new Object[] {new BigInteger("12"), new BigDecimal("12.12"), new Float("12.1"), Integer.valueOf(12), Integer.valueOf(24), Double.valueOf(12.12)};
+			Object[] row1 = new Object[] {new BigInteger("12"), new BigDecimal("12.12"), new Float("12.1"), 12, 24, 12.12};
 			String validOutput1 = "(12,12.12,12.1,12,24,12.12),";
-			Object[] row2 = new Object[] {new BigInteger("42"), new BigDecimal("42.12"), new Float("42.14"), Integer.valueOf(42), Integer.valueOf(64), Double.valueOf(42.14)};
+			Object[] row2 = new Object[] {new BigInteger("42"), new BigDecimal("42.12"), new Float("42.14"), 42, 64, 42.14};
 			String validOutput2 = "(42,42.12,42.14,42,64,42.14),";
-			Object[] row3 = new Object[] {new BigInteger("42"), new BigDecimal("42"), new Float("42"), Integer.valueOf(42), Integer.valueOf(64), Double.valueOf(42)};
+			Object[] row3 = new Object[] {new BigInteger("42"), new BigDecimal("42"), new Float("42"), 42, 64, 42.0};
 			String validOutput3 = "(42,42.00,42.0,42,64,42.0),";
-			Object[] row4 = new Object[] {new BigInteger("42"), new BigDecimal("42.1234"), new Float("42.1434"), Integer.valueOf(42), Integer.valueOf(64), Double.valueOf(42.1234)};
+			Object[] row4 = new Object[] {new BigInteger("42"), new BigDecimal("42.1234"), new Float("42.1434"), 42, 64, 42.1234};
 			String validOutput4 = "(42,42.12,42.1434,42,64,42.1234),";
-			Object[] row5 = new Object[] {BigDecimal.ZERO, BigDecimal.ZERO, new Float("0"), Integer.valueOf(0), Integer.valueOf(0), Double.valueOf(0)};
+			Object[] row5 = new Object[] {BigDecimal.ZERO, BigDecimal.ZERO, new Float("0"), 0, 0, (double) 0};
 			String validOutput5 = "(0,0.00,0.0,0,0,0.0),";
 			//test nulls
 			Object[] row6 = new Object[] {null, null, null, null, null, null};
@@ -351,7 +351,7 @@ public class DumpTest {
 					assertTrue("VALUES missing :"+s, lines.contains(s));
 				}
 			} else {
-				assertTrue("LOCK missing", !lines.contains("LOCK TABLES `" + outputTableName + "` WRITE;"));
+				assertFalse("LOCK missing", lines.contains("LOCK TABLES `" + outputTableName + "` WRITE;"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

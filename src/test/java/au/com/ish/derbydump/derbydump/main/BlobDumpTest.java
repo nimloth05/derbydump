@@ -19,8 +19,8 @@ public class BlobDumpTest {
 
 
 	private Configuration config;
-	private File actualDump = new File("./build/outputs/actualDump.sql");
-	private File expectedDump = new File("./src/test/resources/expectedDump.sql");
+	private final File actualDump = new File("./build/outputs/actualDump.sql");
+	private final File expectedDump = new File("./src/test/resources/expectedDump.sql");
 
 	@Before
 	public void setUp() throws Exception {
@@ -50,6 +50,7 @@ public class BlobDumpTest {
 	}
 
 	@Test
+	@SuppressWarnings({"SqlResolve", "SqlNoDataSourceInspection"})
 	public void theDumpTest() throws Exception {
 
 		DBConnectionManager db = new DBConnectionManager(config.getDerbyUrl().replace("create=false", "create=true"));
