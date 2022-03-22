@@ -19,6 +19,7 @@ package au.com.ish.derbydump.derbydump.main;
 import au.com.ish.derbydump.derbydump.config.Configuration;
 import au.com.ish.derbydump.derbydump.config.DBConnectionManager;
 import au.com.ish.derbydump.derbydump.metadata.Column;
+import au.com.ish.derbydump.derbydump.util.ListUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -136,7 +137,7 @@ public class DumpTest {
       String validOutput2 = "('%',NULL,''),";
       //test quotes and tabs
       Object[] row3 = new Object[]{"'test'", "\"test\"", "\t"};
-      String validOutput3 = "('\\'test\\'','\"test\"','\\t'),";
+      String validOutput3 = "('''test''','\"test\"','\\t'),";
       //test new line chars
       Object[] row4 = new Object[]{"\n", "\r", "\n\r"};
       String validOutput4 = "('\\n','\\r','\\n\\r');";
@@ -327,20 +328,19 @@ public class DumpTest {
       // Now let's read the output and see what is in it
       List<String> lines = IOUtils.readLines(new StringReader(stringWriter.toString()));
 
-      assertEquals("Missing foreign key operations", "SET FOREIGN_KEY_CHECKS = 0;", lines.get(0));
-      assertEquals("Missing foreign key operations", "SET FOREIGN_KEY_CHECKS = 1;", lines.get(lines.size() - 1));
+      assertEquals("Disabling auto commit", "AUTOCOMMIT OFF;", lines.get(0));
+      assertEquals("Enabling auto commit", "AUTOCOMMIT ON;", lines.get(lines.size() - 1));
 
       if (!skipped) {
-        assertTrue("LOCK missing", lines.contains("LOCK TABLES `" + outputTableName + "` WRITE;"));
-        assertTrue("UNLOCK missing", lines.contains("UNLOCK TABLES;"));
-
-        int index = lines.indexOf("LOCK TABLES `" + outputTableName + "` WRITE;");
+        int index = -1;
 
         if (truncate) {
-          assertTrue("TRUNCATE missing", lines.contains("TRUNCATE TABLE " + outputTableName + ";"));
-          assertTrue("INSERT missing, got " + lines.get(index + 2), lines.get(index + 2).startsWith("INSERT INTO " + outputTableName));
+          index = ListUtil.indexOf(lines, (it) -> it.startsWith("TRUNCATE TABLE \"" + outputTableName));
+          assertTrue("TRUNCATE missing", index > -1);
+          assertTrue("INSERT missing, got " + lines.get(index + 1), lines.get(index + 1).startsWith("INSERT INTO \"" + outputTableName));
         } else {
-          assertTrue("INSERT missing, got " + lines.get(index + 1), lines.get(index + 1).startsWith("INSERT INTO " + outputTableName));
+          index = ListUtil.indexOf(lines, (it) -> it.startsWith("INSERT INTO \"" + outputTableName));
+          assertTrue("INSERT missing", index > -1);
         }
 
         for (String s : validOutputs) {

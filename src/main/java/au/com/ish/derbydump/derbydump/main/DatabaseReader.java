@@ -84,7 +84,7 @@ public class DatabaseReader {
 	private void getInternalData(List<Table> tables, Connection connection, String schema) {
 		LOGGER.debug("Fetching database data...");
 
-		output.add("SET FOREIGN_KEY_CHECKS = 0;\n");
+		output.add("AUTOCOMMIT OFF;\n");
 
 		for (Table table : tables) {
 			if (!table.isExcluded()) {
@@ -99,12 +99,11 @@ public class DatabaseReader {
 					if (dataRows.first()) { // check that we have at least one row
 						dataRows.beforeFirst();
 
-						output.add("LOCK TABLES `" + table.getTableName() + "` WRITE;\n");
+//						output.add("LOCK TABLE '" + table.getTableName() + "' IN EXCLUSIVE MODE;\n");
 						if (config.getTruncateTables()) {
-							output.add("TRUNCATE TABLE " + table.getTableName() + ";\n");
+							output.add("TRUNCATE TABLE \"" + table.getTableName() + "\";\n");
 						}
 						output.add(table.getInsertSQL());
-						output.add("\n");
 
 						while (dataRows.next()) {
 
@@ -135,7 +134,6 @@ public class DatabaseReader {
 						}
 
 						output.add(";\n");
-						output.add("UNLOCK TABLES;\n");
 
 						dataRows.close();
 						statement.close();
@@ -147,7 +145,8 @@ public class DatabaseReader {
 				}
 			}
 		}
-		output.add("SET FOREIGN_KEY_CHECKS = 1;");
+		output.add("COMMIT;\n");
+		output.add("AUTOCOMMIT ON;\n");
 		LOGGER.debug("Reading done.");
 	}
 }

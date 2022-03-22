@@ -18,45 +18,47 @@ package au.com.ish.derbydump.derbydump.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
  * Represents a database.
- *
  */
 
 public class Database {
 
-	private String databaseName;
-	private final List<Table> tables = new ArrayList<Table>();
+  private String databaseName;
+  private final List<Table> tables = new ArrayList<Table>();
 
-	/**
-	 * @return the tables
-	 */
-	public List<Table> getTables() {
-		return tables;
-	}
+  /**
+   * @return the tables
+   */
+  public List<Table> getTables() {
+    return tables;
+  }
 
-	public void addTable(Table table)
-    {
-        if (table != null)
-        {
-            tables.add(table);
-        }
+  public void addTable(Table table) {
+    if (table != null) {
+      if (table.getTableName().toLowerCase(Locale.ROOT).equals("customer")) {
+        tables.add(0, table);
+      } else {
+        tables.add(table);
+      }
     }
+  }
 
-	/**
-	 * @return the databaseName
-	 */
-	public String getDatabaseName() {
-		return databaseName;
-	}
+  /**
+   * @return the databaseName
+   */
+  public String getDatabaseName() {
+    return databaseName;
+  }
 
-	/**
-	 * @param databaseName the databaseName to set
-	 */
-	public void setDatabaseName(String databaseName) {
-		this.databaseName = databaseName;
-	}
+  /**
+   * @param databaseName the databaseName to set
+   */
+  public void setDatabaseName(String databaseName) {
+    this.databaseName = databaseName;
+  }
 
 }

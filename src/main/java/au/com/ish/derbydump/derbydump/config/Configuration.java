@@ -21,141 +21,157 @@ import java.util.Properties;
 
 /**
  * Loads relevant application settings from properties file, by default.
- *
  */
 public class Configuration {
 
-	private static Configuration configuration;
-	private final Properties prop = new Properties();
-	private final Properties tableRewriteProp = new Properties();
+  private static Configuration configuration;
+  private final Properties prop = new Properties();
+  private final Properties tableRewriteProp = new Properties();
 
-	private Configuration() {
-		try {
-			FileInputStream file = new FileInputStream("derbydump.properties");
-			prop.load(file);
-			file.close();
+  private Configuration() {
+    try {
+      try (FileInputStream file = new FileInputStream("derbydump.properties")) {
+        prop.load(file);
+      }
+      // check if system properties are provided and override it:
+      setPassedInProperties();
 
-			if (getTableRewritePath() != null && getTableRewritePath().length() > 0) {
-				file = new FileInputStream(getTableRewritePath());
-				tableRewriteProp.load(file);
-				file.close();
-				for (String entry : tableRewriteProp.stringPropertyNames()) {
-					// put a copy of every entry into the properties as lowercase for case-insensitive matching later
-					tableRewriteProp.setProperty(entry.toLowerCase(), tableRewriteProp.getProperty(entry));
-				}
-			}
+      if (getTableRewritePath() != null && getTableRewritePath().length() > 0) {
+        try (FileInputStream file = new FileInputStream(getTableRewritePath())) {
+          tableRewriteProp.load(file);
+        }
+        for (String entry : tableRewriteProp.stringPropertyNames()) {
+          // put a copy of every entry into the properties as lowercase for case-insensitive matching later
+          tableRewriteProp.setProperty(entry.toLowerCase(), tableRewriteProp.getProperty(entry));
+        }
+      }
+    } catch (Exception ignored) {
+    }
+  }
 
-		} catch (Exception ignored) {}
+  private void setPassedInProperties() {
+    setPassedInProperty("db.driverClassName");
+    setPassedInProperty("db.derbyDbPath");
+    setPassedInProperty("db.schemaName");
+    setPassedInProperty("db.userName");
+    setPassedInProperty("db.password");
+    setPassedInProperty("outputPath");
+    setPassedInProperty("output.truncateTables");
+  }
 
-	}
+  private void setPassedInProperty(String propertyName) {
+    if (System.getProperty(propertyName) != null) {
+      prop.setProperty(propertyName, System.getProperty(propertyName));
+    }
+  }
 
-	public static synchronized Configuration getConfiguration() {
-		if (configuration == null) {
-			configuration = new Configuration();
-		}
-		return configuration;
-	}
+  public static synchronized Configuration getConfiguration() {
+    if (configuration == null) {
+      configuration = new Configuration();
+    }
+    return configuration;
+  }
 
-	public String getDerbyUrl() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("jdbc:derby:");
-		stringBuilder.append(getDerbyDbPath());
-		stringBuilder.append(";create=false;");
-		stringBuilder.append("user=").append(getUserName()).append(";");
-		stringBuilder.append("password=").append(getPassword()).append(";");
+  public String getDerbyUrl() {
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("jdbc:derby:");
+    stringBuilder.append(getDerbyDbPath());
+    stringBuilder.append(";create=false;");
+    stringBuilder.append("user=").append(getUserName()).append(";");
+    stringBuilder.append("password=").append(getPassword()).append(";");
 
-		return stringBuilder.toString();
-	}
-
-
-	public void setTableRewriteProperty(String key, String value) {
-		tableRewriteProp.setProperty(key.toLowerCase(), value);
-	}
+    return stringBuilder.toString();
+  }
 
 
-	public String rewriteTableName(String tableName) {
-		String newName = tableRewriteProp.getProperty(tableName.toLowerCase());
-		if (newName != null) {
-			return newName.trim();
-		}
-		return tableName;
-	}
+  public void setTableRewriteProperty(String key, String value) {
+    tableRewriteProp.setProperty(key.toLowerCase(), value);
+  }
 
-	public String getUserName() {
-		return prop.getProperty("db.userName");
-	}
 
-	public void setUserName(String userName) {
-		prop.setProperty("db.userName", userName);
-	}
+  public String rewriteTableName(String tableName) {
+    String newName = tableRewriteProp.getProperty(tableName.toLowerCase());
+    if (newName != null) {
+      return newName.trim();
+    }
+    return tableName;
+  }
 
-	public String getPassword() {
-		return prop.getProperty("db.password");
-	}
+  public String getUserName() {
+    return prop.getProperty("db.userName");
+  }
 
-	public void setPassword(String password) {
-		prop.setProperty("db.password", password);
-	}
+  public void setUserName(String userName) {
+    prop.setProperty("db.userName", userName);
+  }
 
-	public String getDriverClassName() {
-		return prop.getProperty("db.driverClassName");
-	}
+  public String getPassword() {
+    return prop.getProperty("db.password");
+  }
 
-	public void setDriverClassName(String driverClassName) {
-		prop.setProperty("db.driverClassName", driverClassName);
-	}
+  public void setPassword(String password) {
+    prop.setProperty("db.password", password);
+  }
 
-	public String getDerbyDbPath() {
-		return prop.getProperty("db.derbyDbPath");
-	}
+  public String getDriverClassName() {
+    return prop.getProperty("db.driverClassName");
+  }
 
-	public void setDerbyDbPath(String derbyDbPath) {
-		prop.setProperty("db.derbyDbPath", derbyDbPath);
-	}
+  public void setDriverClassName(String driverClassName) {
+    prop.setProperty("db.driverClassName", driverClassName);
+  }
 
-	public String getSchemaName() {
-		return prop.getProperty("db.schemaName");
-	}
+  public String getDerbyDbPath() {
+    return prop.getProperty("db.derbyDbPath");
+  }
 
-	public void setSchemaName(String schemaName) {
-		prop.setProperty("db.schemaName", schemaName);
-	}
+  public void setDerbyDbPath(String derbyDbPath) {
+    prop.setProperty("db.derbyDbPath", derbyDbPath);
+  }
 
-	public int getBufferMaxSize() {
-		if (prop.getProperty("dump.buffer.size") == null) {
-			return 8192;
-		}
-		return  Integer.parseInt(prop.getProperty("dump.buffer.size").trim());
-	}
+  public String getSchemaName() {
+    return prop.getProperty("db.schemaName");
+  }
 
-	public void setBufferMaxSize(int bufferMaxSize) {
-		prop.setProperty("dump.buffer.size", "" + bufferMaxSize);
-	}
+  public void setSchemaName(String schemaName) {
+    prop.setProperty("db.schemaName", schemaName);
+  }
 
-	public String getOutputFilePath() {
-		return prop.getProperty("outputPath");
-	}
+  public int getBufferMaxSize() {
+    if (prop.getProperty("dump.buffer.size") == null) {
+      return 8192;
+    }
+    return Integer.parseInt(prop.getProperty("dump.buffer.size").trim());
+  }
 
-	public void setOutputFilePath(String outputFilePath) {
-		prop.setProperty("outputPath", outputFilePath);
-	}
+  public void setBufferMaxSize(int bufferMaxSize) {
+    prop.setProperty("dump.buffer.size", "" + bufferMaxSize);
+  }
 
-	public String getTableRewritePath() {
-		return prop.getProperty("tableRewritePath");
-	}
+  public String getOutputFilePath() {
+    return prop.getProperty("outputPath");
+  }
 
-	public void setTableRewritePath(String filePath) {
-		prop.setProperty("tableRewritePath", filePath);
-	}
+  public void setOutputFilePath(String outputFilePath) {
+    prop.setProperty("outputPath", outputFilePath);
+  }
 
-	public void setTruncateTables(boolean truncate) {
-		prop.setProperty("output.truncateTables", String.valueOf(truncate));
-	}
+  public String getTableRewritePath() {
+    return prop.getProperty("tableRewritePath");
+  }
 
-	public boolean getTruncateTables() {
-		if (prop.getProperty("output.truncateTables") == null) {
-			return false;
-		}
-		return  Boolean.valueOf(prop.getProperty("output.truncateTables").trim());
-	}
+  public void setTableRewritePath(String filePath) {
+    prop.setProperty("tableRewritePath", filePath);
+  }
+
+  public void setTruncateTables(boolean truncate) {
+    prop.setProperty("output.truncateTables", String.valueOf(truncate));
+  }
+
+  public boolean getTruncateTables() {
+    if (prop.getProperty("output.truncateTables") == null) {
+      return false;
+    }
+    return Boolean.valueOf(prop.getProperty("output.truncateTables").trim());
+  }
 }

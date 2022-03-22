@@ -169,7 +169,8 @@ public class Column {
     }
     byte[] bytes = blob.getBytes(1L, blobLength);
 
-    return "0x" + new String(Hex.encodeHex(bytes)).toUpperCase();
+//    return "0x" + new String(Hex.encodeHex(bytes)).toUpperCase();
+    return "CAST(X'" + new String(Hex.encodeHex(bytes)).toUpperCase() + "' as BLOB)";
   }
 
   /**
@@ -240,7 +241,7 @@ public class Column {
     output = output.replaceAll("\\x1a", "\\\\Z");
 
     // Replace "'" with "\'"
-    output = output.replaceAll("\'", "\\\\'");
+    output = output.replaceAll("\'", "''");
 
     return output;
   }
