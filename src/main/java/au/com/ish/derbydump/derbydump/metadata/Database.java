@@ -21,14 +21,14 @@ import java.util.List;
 
 
 /**
- * Represents a database. 
+ * Represents a database.
  *
  */
 
 public class Database {
 
 	private String databaseName;
-	private List<Table> tables = new ArrayList<Table>();
+	private final List<Table> tables = new ArrayList<Table>();
 
 	/**
 	 * @return the tables
@@ -36,7 +36,7 @@ public class Database {
 	public List<Table> getTables() {
 		return tables;
 	}
-	
+
 	public void addTable(Table table)
     {
         if (table != null)

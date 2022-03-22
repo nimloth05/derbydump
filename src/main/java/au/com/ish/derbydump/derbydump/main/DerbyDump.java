@@ -17,13 +17,14 @@
 package au.com.ish.derbydump.derbydump.main;
 
 import au.com.ish.derbydump.derbydump.config.Configuration;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class DerbyDump {
-	
-	private static final Logger LOGGER = Logger.getLogger(DerbyDump.class);
-	
+
+	private static final Logger LOGGER = LogManager.getLogger(DerbyDump.class);
+
 	public static void main(String[] args) {
 
 			Configuration config = Configuration.getConfiguration();
@@ -38,7 +39,7 @@ public class DerbyDump {
 			LOGGER.debug("\toutput file path =" + config.getOutputFilePath());
 			LOGGER.debug("\ttruncate tables =" + config.getTruncateTables());
 
-			OutputThread output = new OutputThread();
+			OutputThread output = OutputThread.createFromConfiguration();
 			Thread writer = new Thread(output, "File_Writer");
 			writer.start();
 
@@ -50,5 +51,5 @@ public class DerbyDump {
 
 		} catch (InterruptedException ignored) {}
 
-	}	
+	}
 }

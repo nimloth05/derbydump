@@ -21,13 +21,13 @@ import java.util.Properties;
 
 /**
  * Loads relevant application settings from properties file, by default.
- * 
+ *
  */
 public class Configuration {
 
 	private static Configuration configuration;
-	private Properties prop = new Properties();
-	private Properties tableRewriteProp = new Properties();
+	private final Properties prop = new Properties();
+	private final Properties tableRewriteProp = new Properties();
 
 	private Configuration() {
 		try {
@@ -125,7 +125,7 @@ public class Configuration {
 		if (prop.getProperty("dump.buffer.size") == null) {
 			return 8192;
 		}
-		return  Integer.valueOf(prop.getProperty("dump.buffer.size").trim());
+		return  Integer.parseInt(prop.getProperty("dump.buffer.size").trim());
 	}
 
 	public void setBufferMaxSize(int bufferMaxSize) {

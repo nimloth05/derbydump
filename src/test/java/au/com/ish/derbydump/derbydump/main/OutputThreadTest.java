@@ -18,7 +18,8 @@ package au.com.ish.derbydump.derbydump.main;
 
 
 import au.com.ish.derbydump.derbydump.config.Configuration;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -28,55 +29,57 @@ import static junit.framework.Assert.assertEquals;
 
 public class OutputThreadTest {
 
-	private static final Logger LOGGER = Logger.getLogger(OutputThreadTest.class);
+  private static final Logger LOGGER = LogManager.getLogger(OutputThreadTest.class);
 
-	private static final String RESOURCE_DUMP_LOCATION = "./build/tmp/writer_test.out";
+  private static final String RESOURCE_DUMP_LOCATION = "./build/tmp/writer_test.out";
 
-	@BeforeClass
-	public static void setUp() throws Exception {
-		Configuration config = Configuration.getConfiguration();
-		File output = new File(RESOURCE_DUMP_LOCATION);
-		if (output.exists()) {
-			output.delete();
-		}
-		output.mkdirs();
-		config.setOutputFilePath(output.getCanonicalPath());
+  @BeforeClass
+  public static void setUp() throws Exception {
+    Configuration config = Configuration.getConfiguration();
+    File output = new File(RESOURCE_DUMP_LOCATION);
+    if (output.exists()) {
+      output.delete();
+    }
+    output.getParentFile().mkdirs();
+    config.setOutputFilePath(output.getCanonicalPath());
 
-	}
+  }
 
-	@Test
-	public void testAdd() throws Exception {
-		OutputThread output = new OutputThread();
-		Thread writer = new Thread(output, "writer test");
-		writer.start();
+  @Test
+  public void testAdd() throws Exception {
+    StringWriter stringWriter = new StringWriter();
+    OutputThread output = OutputThread.createInMemory(stringWriter);
+    Thread writer = new Thread(output, "writer test");
+    writer.start();
 
-		output.add("Some text");
-		writer.interrupt();
-		writer.join();
+    output.add("Some text");
+    writer.interrupt();
+    writer.join();
 
-		// Now let's read the output and see what is in it
-		BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(RESOURCE_DUMP_LOCATION).getCanonicalPath()),"UTF-8"));
-		String line = in.readLine();
-		in.close();
+    // Now let's read the output and see what is in it
+    BufferedReader in = new BufferedReader(new StringReader(stringWriter.toString()));
+    String line = in.readLine();
+    in.close();
 
-		assertEquals("File writer didn't write correct text.", line, "Some text");
-	}
+    assertEquals("File writer didn't write correct text.", line, "Some text");
+  }
 
-	@Test
-	public void testAddChinese() throws Exception {
-		OutputThread output = new OutputThread();
-		Thread writer = new Thread(output, "writer test");
-		writer.start();
+  @Test
+  public void testAddChinese() throws Exception {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    OutputThread output = OutputThread.createFromOutputStream(out);
+    Thread writer = new Thread(output, "writer test");
+    writer.start();
 
-		output.add("漢字");
-		writer.interrupt();
-		writer.join();
+    output.add("漢字");
+    writer.interrupt();
+    writer.join();
 
-		// Now let's read the output and see what is in it
-		BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(RESOURCE_DUMP_LOCATION).getCanonicalPath()),"UTF-8"));
-		String line = in.readLine();
-		in.close();
+    // Now let's read the output and see what is in it
+    BufferedReader in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(out.toByteArray())));
+    String line = in.readLine();
+    in.close();
 
-		assertEquals("File writer didn't write correct UTF.", line, "漢字");
-	}
+    assertEquals("File writer didn't write correct UTF.", line, "漢字");
+  }
 }

@@ -21,7 +21,8 @@ import au.com.ish.derbydump.derbydump.config.DBConnectionManager;
 import au.com.ish.derbydump.derbydump.metadata.Column;
 import au.com.ish.derbydump.derbydump.metadata.Database;
 import au.com.ish.derbydump.derbydump.metadata.Table;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -36,10 +37,10 @@ import java.util.List;
 public class DatabaseReader {
 
 	private final static int MAX_ALLOWED_ROWS = 100;
-	private static final Logger LOGGER = Logger.getLogger(DatabaseReader.class);
+	private static final Logger LOGGER = LogManager.getLogger(DatabaseReader.class);
 	private final OutputThread output;
 
-	private Configuration config;
+	private final Configuration config;
 
 	public DatabaseReader(OutputThread output) {
 		this.output = output;
@@ -75,7 +76,7 @@ public class DatabaseReader {
 	/**
 	 * Read data from each {@link Table} and add it to
 	 * the output.
-	 * 
+	 *
 	 * @param tables A list of tables to read from
 	 * @param connection The database connection used to fetch the data
 	 * @param schema The name of the schema we are using
@@ -108,7 +109,7 @@ public class DatabaseReader {
 						while (dataRows.next()) {
 
 							output.add("(");
-							
+
 							boolean firstColumn = true;
 							for (Column column : columns) {
 								if (firstColumn) {
@@ -120,15 +121,15 @@ public class DatabaseReader {
 							}
 							rowCount++;
 							output.add(")");
-							
-							
+
+
 							if (!dataRows.isLast()) {
 								if (rowCount % MAX_ALLOWED_ROWS == 0) {
 									output.add(";\n");
 									output.add(table.getInsertSQL());
 									output.add("\n");
 								} else {
-									output.add(",\n");									
+									output.add(",\n");
 								}
 							}
 						}
