@@ -20,12 +20,11 @@ package au.com.ish.derbydump.derbydump.main;
 import au.com.ish.derbydump.derbydump.config.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
-
-import static junit.framework.Assert.assertEquals;
 
 public class OutputThreadTest {
 
@@ -33,7 +32,7 @@ public class OutputThreadTest {
 
   private static final String RESOURCE_DUMP_LOCATION = "./build/tmp/writer_test.out";
 
-  @BeforeClass
+  @BeforeAll
   public static void setUp() throws Exception {
     Configuration config = Configuration.getConfiguration();
     File output = new File(RESOURCE_DUMP_LOCATION);
@@ -61,7 +60,7 @@ public class OutputThreadTest {
     String line = in.readLine();
     in.close();
 
-    assertEquals("File writer didn't write correct text.", line, "Some text");
+    Assertions.assertEquals(line, "Some text", "File writer didn't write correct text.");
   }
 
   @Test
@@ -80,6 +79,6 @@ public class OutputThreadTest {
     String line = in.readLine();
     in.close();
 
-    assertEquals("File writer didn't write correct UTF.", line, "漢字");
+    Assertions.assertEquals(line, "漢字", "File writer didn't write correct UTF.");
   }
 }

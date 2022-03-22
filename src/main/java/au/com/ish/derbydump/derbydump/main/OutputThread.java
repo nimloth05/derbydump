@@ -17,7 +17,6 @@
 package au.com.ish.derbydump.derbydump.main;
 
 import au.com.ish.derbydump.derbydump.config.Configuration;
-import com.sun.org.apache.xml.internal.serializer.OutputPropertyUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

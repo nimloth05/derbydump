@@ -1,31 +1,31 @@
 package au.com.ish.derbydump.derbydump.main;
 
-import java.io.File;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.sql.*;
-import java.util.List;
-
 import au.com.ish.derbydump.derbydump.config.Configuration;
 import au.com.ish.derbydump.derbydump.config.DBConnectionManager;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.fail;
+import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLNonTransientConnectionException;
+import java.sql.Statement;
+import java.util.List;
 
 public class BlobDumpTest {
-
 
   private Configuration config;
   private final File actualDump = new File("./build/outputs/actualDump.sql");
   private final File expectedDump = new File("./src/test/resources/expectedDump.sql");
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     if (actualDump.exists()) {
       actualDump.delete();
@@ -43,7 +43,7 @@ public class BlobDumpTest {
     System.out.println("db " + config.getDerbyUrl().replace("create=false", "create=true"));
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     try {
       new DBConnectionManager("jdbc:derby:" + config.getDerbyDbPath() + ";drop=true");
@@ -98,21 +98,20 @@ public class BlobDumpTest {
       List<String> actualLines = IOUtils.readLines(new StringReader(stringWriter.toString()));
       List<String> expectedLines = FileUtils.readLines(expectedDump);
 
-      assertEquals(expectedLines.size(), actualLines.size());
+      Assertions.assertEquals(expectedLines.size(), actualLines.size());
 
       for (int i = 0; i < actualLines.size(); i++) {
-        assertEquals(expectedLines.get(i), actualLines.get(i));
-        assertEquals("\n" + expectedLines.get(i) + " vs\n" + actualLines.get(i), DigestUtils.md5Hex(expectedLines.get(i)), DigestUtils.md5Hex(actualLines.get(i)));
+        Assertions.assertEquals(expectedLines.get(i), actualLines.get(i));
+        Assertions.assertEquals(DigestUtils.md5Hex(expectedLines.get(i)), DigestUtils.md5Hex(actualLines.get(i)), "\n" + expectedLines.get(i) + " vs\n" + actualLines.get(i));
       }
 
 
       // this is the most important test
-      assertEquals(md5ExpectedDump, md5ActualDump);
-
+      Assertions.assertEquals(md5ExpectedDump, md5ActualDump);
 
     } catch (Exception e) {
       e.printStackTrace();
-      fail("failed to create test data" + e.getMessage());
+      Assertions.fail("failed to create test data" + e.getMessage());
     } finally {
       if (ps != null) {
         ps.close();

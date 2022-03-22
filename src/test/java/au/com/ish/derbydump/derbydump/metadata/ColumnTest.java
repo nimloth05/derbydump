@@ -1,15 +1,13 @@
 package au.com.ish.derbydump.derbydump.metadata;
 
-import java.io.InputStream;
-import java.sql.Clob;
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
-
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
-
-import static junit.framework.Assert.assertEquals;
+import java.io.InputStream;
+import java.sql.Clob;
 
 
 public class ColumnTest {
@@ -19,20 +17,20 @@ public class ColumnTest {
 		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("Penguins.jpg");
 		byte[] inputData = IOUtils.toByteArray(is);
 
-		assertEquals(5569, inputData.length);
+		Assertions.assertEquals(5569, inputData.length);
 
 		String result = Column.processBinaryData(new SerialBlob(inputData));
 
-		assertEquals(11140, result.length());
+		Assertions.assertEquals(11140, result.length());
 
-		assertEquals("0x61", Column.processBinaryData(new SerialBlob(new byte[]{'a'})));
-		assertEquals("0x0A", Column.processBinaryData(new SerialBlob(new byte[]{'\n'})));
+		Assertions.assertEquals("0x61", Column.processBinaryData(new SerialBlob(new byte[]{'a'})));
+		Assertions.assertEquals("0x0A", Column.processBinaryData(new SerialBlob(new byte[]{'\n'})));
 	}
 
 	@Test
 	public void testProcessNullBinaryData() throws Exception {
-		assertEquals("NULL", Column.processBinaryData(null));
-		assertEquals("NULL", Column.processBinaryData(new SerialBlob(new byte[]{})));
+		Assertions.assertEquals("NULL", Column.processBinaryData(null));
+		Assertions.assertEquals("NULL", Column.processBinaryData(new SerialBlob(new byte[]{})));
 	}
 
 	@Test
@@ -42,33 +40,33 @@ public class ColumnTest {
 
 		String processedString = Column.processClobData(inputClob);
 
-		assertEquals("'"+oneSimpleClob+"'", processedString);
+		Assertions.assertEquals("'"+oneSimpleClob+"'", processedString);
 	}
 
 	@Test
 	public void testProcessNullClobData() throws Exception {
-		assertEquals("NULL", Column.processClobData(null));
-		assertEquals("''", Column.processClobData(new SerialClob("".toCharArray())));
+		Assertions.assertEquals("NULL", Column.processClobData(null));
+		Assertions.assertEquals("''", Column.processClobData(new SerialClob("".toCharArray())));
 	}
 
 
 	@Test
 	public void testEscapeQuotes(){
 		String test1 = "'Single quotes'";
-		assertEquals("Single quote", "\\'Single quotes\\'", Column.escapeQuotes(test1));
-		
+		Assertions.assertEquals("\\'Single quotes\\'", Column.escapeQuotes(test1), "Single quote");
+
 		String test2 = "''Single quotes twice''";
-		assertEquals("Single quotes twice", "\\'\\'Single quotes twice\\'\\'", Column.escapeQuotes(test2));
-		
+		Assertions.assertEquals("\\'\\'Single quotes twice\\'\\'", Column.escapeQuotes(test2), "Single quotes twice");
+
 		String test3 = "Tab\t";
-		assertEquals("Tab", "Tab\\t", Column.escapeQuotes(test3));
+		Assertions.assertEquals("Tab\\t", Column.escapeQuotes(test3), "Tab");
 
 		String test4 = "Single backslash\\";
-		assertEquals("Backslash", "Single backslash\\\\", Column.escapeQuotes(test4));
+		Assertions.assertEquals("Single backslash\\\\", Column.escapeQuotes(test4), "Backslash");
 
 		String test5 = "Newline\n and carriage return\r";
-		assertEquals("Newline", "Newline\\n and carriage return\\r", Column.escapeQuotes(test5));
+		Assertions.assertEquals("Newline\\n and carriage return\\r", Column.escapeQuotes(test5), "Newline");
 
-		
+
 	}
 }
