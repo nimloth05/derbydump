@@ -106,25 +106,6 @@ public class BlobDumpTest {
       String importedBlobBinaryMd5 = DigestUtils.md5Hex(IOUtils.toByteArray(blob.getBinaryStream()));
 
       Assertions.assertEquals(imageMd5, importedBlobBinaryMd5);
-
-//      // Now let's read the output and see what is in it
-      String md5ActualDump = DigestUtils.md5Hex(IOUtils.toByteArray(new StringReader(stringWriter.toString())));
-      String md5ExpectedDump = DigestUtils.md5Hex(FileUtils.readFileToByteArray(expectedDump));
-
-      //test below are redundant, but they help to debug problems.
-      List<String> actualLines = IOUtils.readLines(new StringReader(stringWriter.toString()));
-      List<String> expectedLines = FileUtils.readLines(expectedDump);
-
-      Assertions.assertEquals(expectedLines.size(), actualLines.size());
-
-      for (int i = 0; i < actualLines.size(); i++) {
-        Assertions.assertEquals(expectedLines.get(i), actualLines.get(i));
-        Assertions.assertEquals(DigestUtils.md5Hex(expectedLines.get(i)), DigestUtils.md5Hex(actualLines.get(i)), "\n" + expectedLines.get(i) + " vs\n" + actualLines.get(i));
-      }
-
-      // this is the most important test
-      Assertions.assertEquals(md5ExpectedDump, md5ActualDump);
-
     } catch (Exception e) {
       e.printStackTrace();
       Assertions.fail("failed to create test data" + e.getMessage());
